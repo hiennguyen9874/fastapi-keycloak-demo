@@ -11,7 +11,7 @@ from app.schemas.item import ItemCreate, ItemUpdate
 
 class CRUDItem(CRUDBase[Item, ItemCreate, ItemUpdate]):
     async def create_with_owner(
-        self, db: AsyncSession, *, obj_in: ItemCreate, owner_id: int
+        self, db: AsyncSession, *, obj_in: ItemCreate, owner_id: str
     ) -> Item:
         obj_in_data = jsonable_encoder(obj_in)
         db_obj = self.model(**obj_in_data, owner_id=owner_id)
@@ -21,12 +21,10 @@ class CRUDItem(CRUDBase[Item, ItemCreate, ItemUpdate]):
         return db_obj
 
     async def get_multi_by_owner(
-        self, db: AsyncSession, *, owner_id: int, skip: int = 0, limit: int = 100
+        self, db: AsyncSession, *, owner_id: str, skip: int = 0, limit: int = 100
     ) -> List[Item]:
         q = await db.execute(
-            select(self.model)
-            .where(self.model.owner_id == owner_id)
-            .order_by(self.model.id)
+            select(self.model).where(self.model.owner_id == owner_id).order_by(self.model.id)
         )
 
         return q.scalars().all()

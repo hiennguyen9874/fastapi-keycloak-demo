@@ -2,9 +2,6 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from app.schemas.user import User, UserInDB, UserInDBBase
-
-
 # Shared properties
 class ItemBase(BaseModel):
     title: Optional[str] = None
@@ -28,7 +25,7 @@ class ItemInDBBase(ItemBase):
 
     id: int
     title: str
-    owner: UserInDBBase
+    owner_id: str
 
 
 # Properties to return to client
@@ -36,7 +33,7 @@ class Item(ItemInDBBase):
     class Config:
         orm_mode = True
 
-    owner: User
+    owner_id: str
 
 
 # Properties properties stored in DB
@@ -44,4 +41,4 @@ class ItemInDB(ItemInDBBase):
     class Config:
         orm_mode = True
 
-    owner: UserInDB
+    owner_id: str

@@ -96,14 +96,23 @@ class Settings(BaseSettings):
             values.get("SMTP_HOST") and values.get("SMTP_PORT") and values.get("EMAILS_FROM_EMAIL")
         )
 
-    KEYCLOAK_SERVER: HttpUrl
+    KEYCLOAK_SERVER: AnyHttpUrl
+    KEYCLOAK_SERVER_EXTERNAL: AnyHttpUrl
     KEYCLOAK_REALM: str
     KEYCLOAK_CLIENT_ID: str
     KEYCLOAK_CLIENT_SECRET: str
 
     @property
-    def KEYCLOAK_DISCOVERY_URL(self):
+    def KEYCLOAK_DISCOVERY_URL(self) -> str:
         return f"{settings.KEYCLOAK_SERVER}/auth/realms/{settings.KEYCLOAK_REALM}/.well-known/openid-configuration"
+
+    @property
+    def KEYCLOAK_DISCOVERY_EXTERNAL_URL(self) -> str:
+        return f"{settings.KEYCLOAK_SERVER_EXTERNAL}/auth/realms/{settings.KEYCLOAK_REALM}/.well-known/openid-configuration"
+
+    @property
+    def KEYCLOAK_TOKEN_ENDPOINT(self) -> str:
+        return f"{settings.KEYCLOAK_SERVER}/auth/realms/{settings.KEYCLOAK_REALM}/protocol/openid-connect/token"
 
     class Config:
         case_sensitive = True

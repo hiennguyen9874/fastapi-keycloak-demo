@@ -1,19 +1,19 @@
 from datetime import timedelta
 from typing import Any
+import json
+from base64 import b64decode, b64encode
+from itsdangerous.exc import BadSignature
 
 from app import crud, models, schemas
 from app.api import deps
 from app.core import security
 from app.core.settings import settings
-from app.utils.emails import (
-    generate_password_reset_token,
-    send_reset_password_email,
-    verify_password_reset_token,
-)
-from fastapi import APIRouter, Body, Depends, HTTPException
+from app.utils import dict_encode_value
+from fastapi import APIRouter, Body, Depends, HTTPException, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
+from fastapi.responses import RedirectResponse
 
 router = APIRouter()
 
@@ -24,13 +24,20 @@ async def login_via_keycloak(request: Request):
     return await deps.oauth.keycloak.authorize_redirect(request, redirect_uri)
 
 
-@app.get("/auth/keycloak")
-async def auth_via_keycloak(request: Request, response: Response):
-    tokenResponse = deps.oauth.keycloak.authorize_access_token()
+@router.get("/auth/keycloak")
+async def auth_via_keycloak(request: Request):
+    authorization_token = await deps.oauth.keycloak.authorize_access_token(request)
 
-    userinfo = deps.oauth.keycloak.userinfo(request)
-    idToken = deps.oauth.keycloak.parse_id_token(tokenResponse)
+    response = RedirectResponse("/docs/oauth2-redirect")
+    response.set_cookie(key="authorization_token", value=authorization_token, httponly=True)
+    return response
 
-    if idToken:
-        response.set_cookie(key="user", value=idToken, httponly=True)
-        response.set_cookie(key="tokenResponse", value=tokenResponse, httponly=True)
+
+# @router.get("/logout")
+# async def logout(request: Request):
+#     tokenResponse = request.cookies.get("tokenResponse", None)
+#     if tokenResponse:
+#         # TODO: Call end session api
+#         pass
+#     response.delete_cookie("tokenResponse")
+#     return response
