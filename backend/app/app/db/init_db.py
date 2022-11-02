@@ -1,8 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app import crud, schemas
-from app.core.settings import settings
-from app.db import base  # type: ignore
+from app.db import base  # type: ignore # noqa: F401
 
 # make sure all SQL Alchemy models are imported (app.db.base) before initializing DB
 # otherwise, SQL Alchemy might fail to initialize relationships properly

@@ -1,42 +1,22 @@
-from typing import AsyncGenerator, Generator, Any
-import json
-from app import crud, models, schemas
-from app.core import security
-from app.core.settings import settings
-from app.db.session import async_session
-from fastapi import Depends, HTTPException, status, FastAPI
-from fastapi.security import OAuth2PasswordBearer
-from jose import jwt
-from pydantic import ValidationError
-from sqlalchemy.ext.asyncio import AsyncSession
-from authlib.integrations.starlette_client import OAuth
-from authlib.oauth2.rfc6749 import OAuth2Token
-from authlib.integrations.starlette_client.apps import StarletteOAuth2App, StarletteOAuth1App
+from typing import Any, AsyncGenerator, Dict, Optional
+
+from authlib.integrations.base_client import BaseOAuth
+from authlib.integrations.starlette_client.apps import StarletteOAuth1App, StarletteOAuth2App
 from authlib.integrations.starlette_client.integration import StarletteIntegration
 from authlib.oidc.core import UserInfo
-from authlib.integrations.base_client import BaseOAuth
-from fastapi.security import OAuth2, OpenIdConnect
-from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
-from fastapi import Request
-from fastapi.security.utils import get_authorization_scheme_param
-from fastapi import HTTPException
-from fastapi import status
-from typing import Optional
-from typing import Dict
-
-from typing import Optional
-
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.openapi.models import OpenIdConnect as OpenIdConnectModel
 from fastapi.security.base import SecurityBase
-from starlette.requests import Request
-from starlette.status import HTTP_403_FORBIDDEN
-from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
+from fastapi.security.utils import get_authorization_scheme_param
+from starlette.status import HTTP_401_UNAUTHORIZED
 
-from app.utils import decode
+from app import schemas
+from app.core.settings import settings
+from app.db.session import async_session
 
 
 class StarletteOAuth2AppCustom(StarletteOAuth2App):
-    async def fetch_userinfo(self, access_token, **kwargs):
+    async def fetch_userinfo(self, access_token: str, **kwargs) -> UserInfo:  # type: ignore
         metadata = await self.load_server_metadata()
 
         introspection_endpoint = metadata.get("introspection_endpoint")
@@ -63,7 +43,7 @@ class StarletteOAuth2AppCustom(StarletteOAuth2App):
         if active is None:
             raise RuntimeError('Missing "active" value')
 
-        if active == False:
+        if active is False:
             return None
 
         return UserInfo(data)
@@ -74,7 +54,7 @@ class OAuthCustom(BaseOAuth):
     oauth2_client_cls = StarletteOAuth2AppCustom
     framework_integration_cls = StarletteIntegration
 
-    def __init__(self, config=None, cache=None, fetch_token=None, update_token=None):
+    def __init__(self, config=None, cache=None, fetch_token=None, update_token=None) -> None:  # type: ignore
         super(OAuthCustom, self).__init__(
             cache=cache, fetch_token=fetch_token, update_token=update_token
         )
@@ -106,19 +86,10 @@ class OpenIdConnectWithCookie(SecurityBase):
 
     async def __call__(self, request: Request) -> Optional[str]:
         # TODO: Decode access_token token to check token is expired or not
-        authorization_token = request.cookies.get("authorization_token")
+        # TODO: Refresh access_token using refresh_token if access_token is expired
+        userinfo = request.session.get("userinfo")
 
-        if authorization_token:
-            authorization_token = json.loads(decode(authorization_token))
-
-            userinfo = authorization_token.get("userinfo")  # type: ignore
-
-            if not userinfo:
-                if self.auto_error:
-                    raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Not authenticated")
-                else:
-                    return None
-
+        if userinfo:
             return userinfo
 
         authorization = request.headers.get("Authorization")
@@ -154,7 +125,7 @@ class OpenIdConnectWithCookie(SecurityBase):
 reusable_oidc = OpenIdConnectWithCookie(openIdConnectUrl=settings.KEYCLOAK_DISCOVERY_EXTERNAL_URL)
 
 
-def add_swagger_config(app: FastAPI):
+def add_swagger_config(app: FastAPI) -> None:
     app.swagger_ui_init_oauth = {
         # "usePkceWithAuthorizationCodeGrant": True,
         "useBasicAuthenticationWithAccessCodeGrant": True,

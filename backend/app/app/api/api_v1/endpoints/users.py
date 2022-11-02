@@ -1,12 +1,10 @@
-from typing import Any, List, Dict
+from typing import Any
 
-from app import crud, models, schemas
-from app.api import deps
-from app.core.settings import settings
-from fastapi import APIRouter, Body, Depends, HTTPException
-from fastapi.encoders import jsonable_encoder
-from pydantic.networks import EmailStr
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app import schemas
+from app.api import deps
 
 router = APIRouter()
 

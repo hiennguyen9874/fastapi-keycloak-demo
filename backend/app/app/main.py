@@ -3,9 +3,9 @@ from fastapi import FastAPI
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.core.settings import settings
 from app.api.api_v1.api import api_router
 from app.api.deps import add_swagger_config
+from app.core.settings import settings
 
 sentry_sdk.init(settings.SENTRY_DSN)
 

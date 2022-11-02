@@ -1,8 +1,6 @@
-from typing import TYPE_CHECKING
+from sqlalchemy import Column, Integer, String
 
 from app.db.base_class import Base
-from sqlalchemy import Column, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
 
 
 class Item(Base):
