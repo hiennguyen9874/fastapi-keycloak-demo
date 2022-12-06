@@ -1,8 +1,8 @@
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import APIRouter, Depends
 
-from app import models, schemas
+from app import schemas
 from app.api import deps
 from app.worker import test_celery as test_celery_task
 
@@ -24,7 +24,7 @@ async def test_celery(
 
 # Calling this endpoint to see if the setup works. If yes, an error message will show in Sentry dashboard
 @router.get("/test-sentry")
-async def test_sentry():
+async def test_sentry() -> Any:
     """
     Test Sentry.
     """

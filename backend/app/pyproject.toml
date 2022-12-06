@@ -30,7 +30,23 @@ itsdangerous = "^2.1.2"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 
 [tool.poetry.dev-dependencies]
-black = "^21.9b0"
+black = "^22.10.0"
+pylint = "^2.15.5"
+flake8 = "^5.0.4"
+isort = "^5.10.1"
+mypy = "^0.982"
+pre-commit = "^2.20.0"
+flake8-blind-except = "^0.2.1"
+flake8-bandit = "^4.1.1"
+flake8-docstrings = "^1.6.0"
+flake8-logging-format = "^0.8.1"
+flake8-print = "^5.0.0"
+autoflake = "^1.7.7"
+sqlalchemy-stubs = "^0.4"
+types-geoip2 = "^3.0.0"
+types-pytz = "^2022.6.0"
+types-redis = "^4.3.21"
+bandit = "^1.7.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
