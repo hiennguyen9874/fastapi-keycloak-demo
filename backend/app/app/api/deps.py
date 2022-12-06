@@ -156,7 +156,7 @@ reusable_oidc = OpenIdConnectWithCookie(openIdConnectUrl=settings.KEYCLOAK_DISCO
 
 def add_swagger_config(app: FastAPI):
     app.swagger_ui_init_oauth = {
-        # "usePkceWithAuthorizationCodeGrant": True,
+        "usePkceWithAuthorizationCodeGrant": True,
         "useBasicAuthenticationWithAccessCodeGrant": True,
         "clientId": settings.KEYCLOAK_CLIENT_ID,
         "clientSecret": settings.KEYCLOAK_CLIENT_SECRET,
